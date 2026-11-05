@@ -1,0 +1,222 @@
+/* --- 1. Base Setup --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;   /* fallback */
+    min-height: 100dvh;  /* fixes mobile browser toolbars */
+    padding: 1rem;
+    color: #333;
+}
+
+/* --- 2. The Main Card --- */
+.calculator-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 400px; /* Keeps the app from getting too wide on desktop */
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 420px) {
+    .calculator-card {
+        padding: 1.25rem;
+    }
+}
+
+/* --- 3. Typography & Toggles --- */
+header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #102a43;
+}
+
+.toggle-container {
+    display: flex;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #486581; /* darker than before for better contrast */
+    transition: all 0.3s ease;
+}
+
+.toggle-btn.active {
+    background: #3182ce;
+    color: white;
+}
+
+.toggle-btn:focus-visible {
+    outline: 3px solid #102a43;
+    outline-offset: -3px;
+}
+
+/* --- 4. Inputs & Forms --- */
+.input-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.input-row .form-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.unit-group {
+    flex: 0 0 90px !important;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #486581;
+}
+
+select, input {
+    padding: 0.75rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+select:focus, input:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
+}
+
+/* --- 5. Results Display --- */
+.results-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed #e2e8f0;
+}
+
+.results-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #102a43;
+}
+
+.message {
+    background: #fffaf0;
+    border-left: 4px solid #dd6b20;
+    color: #7b341e;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.result-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    border-left: 4px solid #48bb78; /* Green accent color */
+}
+
+.result-label {
+    font-weight: 600;
+    color: #486581;
+}
+
+.result-value {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #102a43;
+    text-align: right;
+    overflow-wrap: anywhere; /* long numbers won't overflow the card */
+}
+
+/* Utility class for JavaScript to toggle visibility */
+.hidden {
+    display: none !important;
+}
+
+/* --- 6. Formulas & Steps --- */
+.steps {
+    margin-top: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #3182ce;
+}
+
+.steps summary {
+    cursor: pointer;
+    padding: 0.85rem 1rem;
+    font-weight: 600;
+    color: #102a43;
+}
+
+.steps summary:focus-visible {
+    outline: 3px solid #102a43;
+    outline-offset: -3px;
+    border-radius: 8px;
+}
+
+#steps-content {
+    padding: 0 1rem 0.5rem;
+}
+
+.step {
+    padding: 0.75rem 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+.step-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #486581;
+    margin-bottom: 0.25rem;
+}
+
+.step-formula {
+    font-weight: 700;
+    color: #102a43;
+    margin-bottom: 0.25rem;
+    overflow-wrap: anywhere;
+}
+
+.step-work {
+    font-size: 0.95rem;
+    color: #333;
+    overflow-wrap: anywhere;
+}
