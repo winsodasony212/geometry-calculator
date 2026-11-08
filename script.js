@@ -1,5 +1,24 @@
 'use strict';
 
+/* ---------- Shared helpers ---------- */
+
+// Returns an error message, or null if the sides form a valid triangle
+function triangleError(a, b, c) {
+  if (a <= 0 || b <= 0 || c <= 0) {
+    return 'Triangle sides must be greater than 0.';
+  }
+  if (a + b <= c || a + c <= b || b + c <= a) {
+    return 'These sides cannot form a triangle. Each side must be shorter than the other two combined.';
+  }
+  return null;
+}
+
+// Heron's formula
+function heron(a, b, c) {
+  const s = (a + b + c) / 2;
+  return Math.sqrt(s * (s - a) * (s - b) * (s - c));
+}
+
 /* ---------- Shape definitions ---------- */
 
 const shapes2D = {
@@ -20,6 +39,13 @@ const shapes2D = {
     perimeter: ({ width, height }) => 2 * (width + height),
     perimeterLabel: 'Perimeter',
   },
+  square: {
+    label: 'Square',
+    inputs: [{ id: 'side', label: 'Side Length (s)', placeholder: 'e.g., 4' }],
+    area: ({ side }) => side ** 2,
+    perimeter: ({ side }) => 4 * side,
+    perimeterLabel: 'Perimeter',
+  },
   triangle: {
     label: 'Triangle',
     inputs: [
@@ -27,22 +53,69 @@ const shapes2D = {
       { id: 'sideB', label: 'Side B (b)', placeholder: 'e.g., 4' },
       { id: 'sideC', label: 'Side C (c)', placeholder: 'e.g., 5' },
     ],
-    // Returns an error message, or null if the sides form a valid triangle
-    validate: ({ sideA: a, sideB: b, sideC: c }) => {
-      if (a <= 0 || b <= 0 || c <= 0) {
-        return 'Triangle sides must be greater than 0.';
-      }
-      if (a + b <= c || a + c <= b || b + c <= a) {
-        return 'These sides cannot form a triangle. Each side must be shorter than the other two combined.';
-      }
-      return null;
-    },
-    // Heron's formula
-    area: ({ sideA: a, sideB: b, sideC: c }) => {
-      const s = (a + b + c) / 2;
-      return Math.sqrt(s * (s - a) * (s - b) * (s - c));
-    },
+    validate: ({ sideA, sideB, sideC }) => triangleError(sideA, sideB, sideC),
+    area: ({ sideA, sideB, sideC }) => heron(sideA, sideB, sideC),
     perimeter: ({ sideA, sideB, sideC }) => sideA + sideB + sideC,
+    perimeterLabel: 'Perimeter',
+  },
+  parallelogram: {
+    label: 'Parallelogram',
+    inputs: [
+      { id: 'base', label: 'Base (b)', placeholder: 'e.g., 8' },
+      { id: 'height', label: 'Height (h)', placeholder: 'e.g., 4' },
+      { id: 'side', label: 'Slanted Side (s)', placeholder: 'e.g., 5' },
+    ],
+    area: ({ base, height }) => base * height,
+    perimeter: ({ base, side }) => 2 * (base + side),
+    perimeterLabel: 'Perimeter',
+  },
+  trapezoid: {
+    label: 'Trapezoid',
+    inputs: [
+      { id: 'baseA', label: 'Base A (a)', placeholder: 'e.g., 10' },
+      { id: 'baseB', label: 'Base B (b)', placeholder: 'e.g., 6' },
+      { id: 'height', label: 'Height (h)', placeholder: 'e.g., 4' },
+      { id: 'legA', label: 'Left Leg (c)', placeholder: 'e.g., 5' },
+      { id: 'legB', label: 'Right Leg (d)', placeholder: 'e.g., 5' },
+    ],
+    area: ({ baseA, baseB, height }) => 0.5 * (baseA + baseB) * height,
+    perimeter: ({ baseA, baseB, legA, legB }) => baseA + baseB + legA + legB,
+    perimeterLabel: 'Perimeter',
+  },
+  rhombus: {
+    label: 'Rhombus',
+    inputs: [
+      { id: 'diag1', label: 'Diagonal 1 (p)', placeholder: 'e.g., 8' },
+      { id: 'diag2', label: 'Diagonal 2 (q)', placeholder: 'e.g., 6' },
+    ],
+    area: ({ diag1, diag2 }) => (diag1 * diag2) / 2,
+    perimeter: ({ diag1, diag2 }) => 4 * Math.sqrt((diag1 / 2) ** 2 + (diag2 / 2) ** 2),
+    perimeterLabel: 'Perimeter',
+  },
+  ellipse: {
+    label: 'Ellipse',
+    inputs: [
+      { id: 'semiA', label: 'Semi-axis A (a)', placeholder: 'e.g., 6' },
+      { id: 'semiB', label: 'Semi-axis B (b)', placeholder: 'e.g., 4' },
+    ],
+    area: ({ semiA, semiB }) => Math.PI * semiA * semiB,
+    // Ramanujan's approximation
+    perimeter: ({ semiA: a, semiB: b }) =>
+      Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b))),
+    perimeterLabel: 'Circumference (approx.)',
+  },
+  polygon: {
+    label: 'Regular Polygon',
+    inputs: [
+      { id: 'sides', label: 'Number of Sides (n)', placeholder: 'e.g., 6', min: 3, step: 1 },
+      { id: 'side', label: 'Side Length (s)', placeholder: 'e.g., 4' },
+    ],
+    validate: ({ sides }) =>
+      Number.isInteger(sides) && sides >= 3
+        ? null
+        : 'The number of sides must be a whole number of 3 or more.',
+    area: ({ sides, side }) => (sides * side ** 2) / (4 * Math.tan(Math.PI / sides)),
+    perimeter: ({ sides, side }) => sides * side,
     perimeterLabel: 'Perimeter',
   },
 };
@@ -55,11 +128,55 @@ const shapes3D = {
     volume: ({ radius }) => (4 / 3) * Math.PI * radius ** 3,
     areaLabel: 'Surface Area',
   },
+  hemisphere: {
+    label: 'Hemisphere',
+    inputs: [{ id: 'radius', label: 'Radius (r)', placeholder: 'e.g., 5' }],
+    // Curved surface (2πr²) + flat circular base (πr²)
+    area: ({ radius }) => 3 * Math.PI * radius ** 2,
+    volume: ({ radius }) => (2 / 3) * Math.PI * radius ** 3,
+    areaLabel: 'Surface Area (incl. base)',
+  },
   cube: {
     label: 'Cube',
     inputs: [{ id: 'side', label: 'Side Length (s)', placeholder: 'e.g., 4' }],
     area: ({ side }) => 6 * side ** 2,
     volume: ({ side }) => side ** 3,
+    areaLabel: 'Surface Area',
+  },
+  rectPrism: {
+    label: 'Rectangular Prism',
+    inputs: [
+      { id: 'length', label: 'Length (l)', placeholder: 'e.g., 8' },
+      { id: 'width', label: 'Width (w)', placeholder: 'e.g., 5' },
+      { id: 'height', label: 'Height (h)', placeholder: 'e.g., 3' },
+    ],
+    area: ({ length, width, height }) =>
+      2 * (length * width + length * height + width * height),
+    volume: ({ length, width, height }) => length * width * height,
+    areaLabel: 'Surface Area',
+  },
+  triPrism: {
+    label: 'Triangular Prism',
+    inputs: [
+      { id: 'sideA', label: 'Triangle Side A (a)', placeholder: 'e.g., 3' },
+      { id: 'sideB', label: 'Triangle Side B (b)', placeholder: 'e.g., 4' },
+      { id: 'sideC', label: 'Triangle Side C (c)', placeholder: 'e.g., 5' },
+      { id: 'length', label: 'Prism Length (L)', placeholder: 'e.g., 10' },
+    ],
+    validate: ({ sideA, sideB, sideC }) => triangleError(sideA, sideB, sideC),
+    area: ({ sideA, sideB, sideC, length }) =>
+      2 * heron(sideA, sideB, sideC) + (sideA + sideB + sideC) * length,
+    volume: ({ sideA, sideB, sideC, length }) => heron(sideA, sideB, sideC) * length,
+    areaLabel: 'Surface Area',
+  },
+  hexPrism: {
+    label: 'Hexagonal Prism',
+    inputs: [
+      { id: 'side', label: 'Hexagon Side (a)', placeholder: 'e.g., 4' },
+      { id: 'height', label: 'Prism Height (h)', placeholder: 'e.g., 10' },
+    ],
+    area: ({ side, height }) => 3 * Math.sqrt(3) * side ** 2 + 6 * side * height,
+    volume: ({ side, height }) => ((3 * Math.sqrt(3)) / 2) * side ** 2 * height,
     areaLabel: 'Surface Area',
   },
   cylinder: {
@@ -83,6 +200,31 @@ const shapes3D = {
       return Math.PI * radius * (radius + slant);
     },
     volume: ({ radius, height }) => (1 / 3) * Math.PI * radius ** 2 * height,
+    areaLabel: 'Surface Area',
+  },
+  squarePyramid: {
+    label: 'Square Pyramid',
+    inputs: [
+      { id: 'base', label: 'Base Side (b)', placeholder: 'e.g., 6' },
+      { id: 'height', label: 'Height (h)', placeholder: 'e.g., 4' },
+    ],
+    area: ({ base, height }) => {
+      const slant = Math.sqrt(height ** 2 + (base / 2) ** 2);
+      return base ** 2 + 2 * base * slant;
+    },
+    volume: ({ base, height }) => (base ** 2 * height) / 3,
+    areaLabel: 'Surface Area',
+  },
+  torus: {
+    label: 'Torus',
+    inputs: [
+      { id: 'majorR', label: 'Major Radius (R)', placeholder: 'e.g., 6' },
+      { id: 'minorR', label: 'Minor Radius (r)', placeholder: 'e.g., 2' },
+    ],
+    validate: ({ majorR, minorR }) =>
+      majorR >= minorR ? null : 'The major radius (R) must be at least as large as the minor radius (r).',
+    area: ({ majorR, minorR }) => 4 * Math.PI ** 2 * majorR * minorR,
+    volume: ({ majorR, minorR }) => 2 * Math.PI ** 2 * majorR * minorR ** 2,
     areaLabel: 'Surface Area',
   },
 };
@@ -109,6 +251,13 @@ const steps2D = {
       { label: 'Perimeter', formula: 'P = 2 × (w + h)', work: `P = 2 × (${w} + ${h})`, value: shapes2D.rectangle.perimeter(v), power: 1 },
     ];
   },
+  square: (v) => {
+    const s = num(v.side);
+    return [
+      { label: 'Area', formula: 'A = s²', work: `A = ${s}²`, value: shapes2D.square.area(v), power: 2 },
+      { label: 'Perimeter', formula: 'P = 4 × s', work: `P = 4 × ${s}`, value: shapes2D.square.perimeter(v), power: 1 },
+    ];
+  },
   triangle: (v) => {
     const a = num(v.sideA);
     const b = num(v.sideB);
@@ -127,6 +276,64 @@ const steps2D = {
       { label: 'Perimeter', formula: 'P = a + b + c', work: `P = ${a} + ${b} + ${c}`, value: shapes2D.triangle.perimeter(v), power: 1 },
     ];
   },
+  parallelogram: (v) => {
+    const b = num(v.base);
+    const h = num(v.height);
+    const s = num(v.side);
+    return [
+      { label: 'Area', formula: 'A = b × h', work: `A = ${b} × ${h}`, value: shapes2D.parallelogram.area(v), power: 2 },
+      { label: 'Perimeter', formula: 'P = 2 × (b + s)', work: `P = 2 × (${b} + ${s})`, value: shapes2D.parallelogram.perimeter(v), power: 1 },
+    ];
+  },
+  trapezoid: (v) => {
+    const a = num(v.baseA);
+    const b = num(v.baseB);
+    const h = num(v.height);
+    const c = num(v.legA);
+    const d = num(v.legB);
+    return [
+      { label: 'Area', formula: 'A = (1/2) × (a + b) × h', work: `A = (1/2) × (${a} + ${b}) × ${h}`, value: shapes2D.trapezoid.area(v), power: 2 },
+      { label: 'Perimeter', formula: 'P = a + b + c + d', work: `P = ${a} + ${b} + ${c} + ${d}`, value: shapes2D.trapezoid.perimeter(v), power: 1 },
+    ];
+  },
+  rhombus: (v) => {
+    const p = num(v.diag1);
+    const q = num(v.diag2);
+    const side = Math.sqrt((v.diag1 / 2) ** 2 + (v.diag2 / 2) ** 2);
+    return [
+      { label: 'Area', formula: 'A = (p × q) / 2', work: `A = (${p} × ${q}) / 2`, value: shapes2D.rhombus.area(v), power: 2 },
+      { label: 'Side length', formula: 's = √((p/2)² + (q/2)²)', work: `s = √((${p}/2)² + (${q}/2)²)`, value: side, power: 1 },
+      { label: 'Perimeter', formula: 'P = 4 × s', work: `P = 4 × ${num(side)}`, value: shapes2D.rhombus.perimeter(v), power: 1 },
+    ];
+  },
+  ellipse: (v) => {
+    const a = num(v.semiA);
+    const b = num(v.semiB);
+    return [
+      { label: 'Area', formula: 'A = π × a × b', work: `A = π × ${a} × ${b}`, value: shapes2D.ellipse.area(v), power: 2 },
+      {
+        label: 'Circumference (Ramanujan approximation)',
+        formula: 'C ≈ π × [3 × (a + b) − √((3a + b) × (a + 3b))]',
+        work: `C ≈ π × [3 × (${a} + ${b}) − √((3 × ${a} + ${b}) × (${a} + 3 × ${b}))]`,
+        value: shapes2D.ellipse.perimeter(v),
+        power: 1,
+      },
+    ];
+  },
+  polygon: (v) => {
+    const n = num(v.sides);
+    const s = num(v.side);
+    return [
+      {
+        label: 'Area',
+        formula: 'A = (n × s²) / (4 × tan(π / n))',
+        work: `A = (${n} × ${s}²) / (4 × tan(π / ${n}))`,
+        value: shapes2D.polygon.area(v),
+        power: 2,
+      },
+      { label: 'Perimeter', formula: 'P = n × s', work: `P = ${n} × ${s}`, value: shapes2D.polygon.perimeter(v), power: 1 },
+    ];
+  },
 };
 
 const steps3D = {
@@ -137,11 +344,82 @@ const steps3D = {
       { label: 'Volume', formula: 'V = (4/3) × π × r³', work: `V = (4/3) × π × ${r}³`, value: shapes3D.sphere.volume(v), power: 3 },
     ];
   },
+  hemisphere: (v) => {
+    const r = num(v.radius);
+    return [
+      {
+        label: 'Surface Area (curved + flat base)',
+        formula: 'SA = 2 × π × r² + π × r² = 3 × π × r²',
+        work: `SA = 3 × π × ${r}²`,
+        value: shapes3D.hemisphere.area(v),
+        power: 2,
+      },
+      { label: 'Volume', formula: 'V = (2/3) × π × r³', work: `V = (2/3) × π × ${r}³`, value: shapes3D.hemisphere.volume(v), power: 3 },
+    ];
+  },
   cube: (v) => {
     const s = num(v.side);
     return [
       { label: 'Surface Area', formula: 'SA = 6 × s²', work: `SA = 6 × ${s}²`, value: shapes3D.cube.area(v), power: 2 },
       { label: 'Volume', formula: 'V = s³', work: `V = ${s}³`, value: shapes3D.cube.volume(v), power: 3 },
+    ];
+  },
+  rectPrism: (v) => {
+    const l = num(v.length);
+    const w = num(v.width);
+    const h = num(v.height);
+    return [
+      {
+        label: 'Surface Area',
+        formula: 'SA = 2 × (l × w + l × h + w × h)',
+        work: `SA = 2 × (${l} × ${w} + ${l} × ${h} + ${w} × ${h})`,
+        value: shapes3D.rectPrism.area(v),
+        power: 2,
+      },
+      { label: 'Volume', formula: 'V = l × w × h', work: `V = ${l} × ${w} × ${h}`, value: shapes3D.rectPrism.volume(v), power: 3 },
+    ];
+  },
+  triPrism: (v) => {
+    const a = num(v.sideA);
+    const b = num(v.sideB);
+    const c = num(v.sideC);
+    const L = num(v.length);
+    const s = (v.sideA + v.sideB + v.sideC) / 2;
+    const sn = num(s);
+    const base = heron(v.sideA, v.sideB, v.sideC);
+    return [
+      { label: 'Semi-perimeter of triangle', formula: 's = (a + b + c) / 2', work: `s = (${a} + ${b} + ${c}) / 2`, value: s, power: 1 },
+      {
+        label: 'Triangle base area (Heron’s formula)',
+        formula: 'B = √(s × (s − a) × (s − b) × (s − c))',
+        work: `B = √(${sn} × (${sn} − ${a}) × (${sn} − ${b}) × (${sn} − ${c}))`,
+        value: base,
+        power: 2,
+      },
+      {
+        label: 'Surface Area',
+        formula: 'SA = 2 × B + (a + b + c) × L',
+        work: `SA = 2 × ${num(base)} + (${a} + ${b} + ${c}) × ${L}`,
+        value: shapes3D.triPrism.area(v),
+        power: 2,
+      },
+      { label: 'Volume', formula: 'V = B × L', work: `V = ${num(base)} × ${L}`, value: shapes3D.triPrism.volume(v), power: 3 },
+    ];
+  },
+  hexPrism: (v) => {
+    const a = num(v.side);
+    const h = num(v.height);
+    const base = ((3 * Math.sqrt(3)) / 2) * v.side ** 2;
+    return [
+      { label: 'Hexagon base area', formula: 'B = (3√3 / 2) × a²', work: `B = (3√3 / 2) × ${a}²`, value: base, power: 2 },
+      {
+        label: 'Surface Area',
+        formula: 'SA = 2 × B + 6 × a × h',
+        work: `SA = 2 × ${num(base)} + 6 × ${a} × ${h}`,
+        value: shapes3D.hexPrism.area(v),
+        power: 2,
+      },
+      { label: 'Volume', formula: 'V = B × h', work: `V = ${num(base)} × ${h}`, value: shapes3D.hexPrism.volume(v), power: 3 },
     ];
   },
   cylinder: (v) => {
@@ -160,6 +438,30 @@ const steps3D = {
       { label: 'Slant height', formula: 'l = √(r² + h²)', work: `l = √(${r}² + ${h}²)`, value: slant, power: 1 },
       { label: 'Surface Area', formula: 'SA = π × r × (r + l)', work: `SA = π × ${r} × (${r} + ${num(slant)})`, value: shapes3D.cone.area(v), power: 2 },
       { label: 'Volume', formula: 'V = (1/3) × π × r² × h', work: `V = (1/3) × π × ${r}² × ${h}`, value: shapes3D.cone.volume(v), power: 3 },
+    ];
+  },
+  squarePyramid: (v) => {
+    const b = num(v.base);
+    const h = num(v.height);
+    const slant = Math.sqrt(v.height ** 2 + (v.base / 2) ** 2);
+    return [
+      { label: 'Slant height', formula: 'l = √(h² + (b/2)²)', work: `l = √(${h}² + (${b}/2)²)`, value: slant, power: 1 },
+      {
+        label: 'Surface Area',
+        formula: 'SA = b² + 2 × b × l',
+        work: `SA = ${b}² + 2 × ${b} × ${num(slant)}`,
+        value: shapes3D.squarePyramid.area(v),
+        power: 2,
+      },
+      { label: 'Volume', formula: 'V = (1/3) × b² × h', work: `V = (1/3) × ${b}² × ${h}`, value: shapes3D.squarePyramid.volume(v), power: 3 },
+    ];
+  },
+  torus: (v) => {
+    const R = num(v.majorR);
+    const r = num(v.minorR);
+    return [
+      { label: 'Surface Area', formula: 'SA = 4 × π² × R × r', work: `SA = 4 × π² × ${R} × ${r}`, value: shapes3D.torus.area(v), power: 2 },
+      { label: 'Volume', formula: 'V = 2 × π² × R × r²', work: `V = 2 × π² × ${R} × ${r}²`, value: shapes3D.torus.volume(v), power: 3 },
     ];
   },
 };
@@ -272,13 +574,13 @@ function renderInputs() {
 
   // Inputs (all strings here come from the static config above, not from users)
   dynamicInputs.innerHTML = '';
-  shape.inputs.forEach(({ id, label, placeholder }) => {
+  shape.inputs.forEach(({ id, label, placeholder, min = 0, step = 'any' }) => {
     const group = document.createElement('div');
     group.className = 'form-group';
     group.innerHTML = `
       <label for="input-${id}">${label}</label>
       <input type="number" id="input-${id}" placeholder="${placeholder}"
-             min="0" step="any" inputmode="decimal">
+             min="${min}" step="${step}" inputmode="decimal">
     `;
     dynamicInputs.appendChild(group);
   });
