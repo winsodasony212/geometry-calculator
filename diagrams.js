@@ -1,10 +1,11 @@
 'use strict';
 /* Inline SVG diagrams. Labels use the same symbols as the input fields and formulas. */
 (() => {
-  const T = (x, y, s, a) => `<text x="${x}" y="${y}"${a ? ` text-anchor="${a}"` : ''}>${s}</text>`;
+  const T = (x, y, s, a = 'middle') => `<text x="${x}" y="${y}" text-anchor="${a}" fill="currentColor" stroke="none" font-size="11" font-weight="600">${s}</text>`;
   const P = (d) => `<path d="${d}"/>`;
-  const D = (d) => `<path class="d" d="${d}"/>`;
-  const E = (cx, cy, rx, ry, c = '') => `<ellipse${c ? ` class="${c}"` : ''} cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`;
+  const DASH = 'stroke-dasharray="3 3" stroke-width="1.5"';
+  const D = (d) => `<path class="d" ${DASH} d="${d}"/>`;
+  const E = (cx, cy, rx, ry, c = '') => `<ellipse${c ? ` class="${c}" ${DASH}` : ''} cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`;
 
   const art = {
     circle: `<circle cx="70" cy="50" r="36"/>${D('M70 50h36')}${T(88, 45, 'r')}`,
@@ -30,7 +31,7 @@
   };
 
   const svg = (key, label) =>
-    `<svg viewBox="0 0 140 105" role="img" aria-label="${label} with labeled dimensions">${art[key] || ''}</svg>`;
+    `<svg viewBox="0 0 140 105" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;max-width:240px;height:auto;color:var(--accent,#3182ce)" role="img" aria-label="${label} with labeled dimensions">${art[key] || ''}</svg>`;
 
   const api = { art, svg };
   if (typeof module !== 'undefined') module.exports = api;
