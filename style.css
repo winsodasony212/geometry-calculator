@@ -1,222 +1,61 @@
-/* --- 1. Base Setup --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root {
+  --bg: #f0f4f8; --card: #fff; --text: #243b53; --muted: #486581; --heading: #102a43;
+  --border: #cbd5e1; --soft: #f8fafc; --track: #e2e8f0; --accent: #2b6cb0; --accent-text: #fff;
+  --good: #2f855a; --error-bg: #fff5f5; --error: #c53030;
 }
-
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #a0aec0; --heading: #f1f5f9;
+    --border: #475569; --soft: #0f172a; --track: #334155; --accent: #63b3ed; --accent-text: #0f172a;
+    --good: #68d391; --error-bg: #3b1d1d; --error: #feb2b2;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f4f8;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;   /* fallback */
-    min-height: 100dvh;  /* fixes mobile browser toolbars */
-    padding: 1rem;
-    color: #333;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+  min-height: 100vh; min-height: 100dvh;
+  display: grid; place-items: start center; padding: clamp(1rem, 4vw, 3rem) 1rem;
 }
-
-/* --- 2. The Main Card --- */
-.calculator-card {
-    background: #ffffff;
-    width: 100%;
-    max-width: 400px; /* Keeps the app from getting too wide on desktop */
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+.card {
+  width: 100%; max-width: 440px; background: var(--card); padding: clamp(1.25rem, 4vw, 2rem);
+  border-radius: 16px; box-shadow: 0 10px 30px rgb(0 0 0 / 0.08);
 }
-
-@media (max-width: 420px) {
-    .calculator-card {
-        padding: 1.25rem;
-    }
+header { text-align: center; margin-bottom: 1.5rem; }
+h1 { font-size: 1.5rem; color: var(--heading); margin-bottom: 1rem; }
+h2 { font-size: 1.1rem; color: var(--heading); margin-bottom: 1rem; }
+.toggle { display: flex; background: var(--track); border-radius: 8px; padding: 3px; gap: 3px; }
+.toggle button {
+  flex: 1; padding: 0.65rem; border: 0; border-radius: 6px; background: none;
+  color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s;
 }
-
-/* --- 3. Typography & Toggles --- */
-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-h1 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: #102a43;
-}
-
-.toggle-container {
-    display: flex;
-    background: #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.toggle-btn {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #486581; /* darker than before for better contrast */
-    transition: all 0.3s ease;
-}
-
-.toggle-btn.active {
-    background: #3182ce;
-    color: white;
-}
-
-.toggle-btn:focus-visible {
-    outline: 3px solid #102a43;
-    outline-offset: -3px;
-}
-
-/* --- 4. Inputs & Forms --- */
-.input-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.input-row .form-group {
-    flex: 1;
-    min-width: 0;
-}
-
-.unit-group {
-    flex: 0 0 90px !important;
-}
-
-.form-group {
-    margin-bottom: 1.25rem;
-    display: flex;
-    flex-direction: column;
-}
-
-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #486581;
-}
-
+.toggle button.active { background: var(--accent); color: var(--accent-text); }
+.field { display: flex; flex-direction: column; margin-bottom: 1.1rem; min-width: 0; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+label { font-size: 0.9rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; }
 select, input {
-    padding: 0.75rem;
-    border: 2px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: inherit;
-    transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%; padding: 0.7rem; font: inherit; color: var(--text); background: var(--card);
+  border: 2px solid var(--border); border-radius: 8px; transition: border-color 0.2s;
 }
-
-select:focus, input:focus {
-    outline: none;
-    border-color: #3182ce;
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
+select:focus-visible, input:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px;
 }
-
-/* --- 5. Results Display --- */
-.results-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 2px dashed #e2e8f0;
+input:focus-visible, select:focus-visible { border-color: var(--accent); }
+.results-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed var(--track); }
+.message { background: var(--error-bg); color: var(--error); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.95rem; }
+.result {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  background: var(--soft); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem;
+  border-left: 4px solid var(--good);
 }
-
-.results-section h2 {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: #102a43;
-}
-
-.message {
-    background: #fffaf0;
-    border-left: 4px solid #dd6b20;
-    color: #7b341e;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
-    font-size: 0.9rem;
-}
-
-.result-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    background: #f8fafc;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
-    border-left: 4px solid #48bb78; /* Green accent color */
-}
-
-.result-label {
-    font-weight: 600;
-    color: #486581;
-}
-
-.result-value {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #102a43;
-    text-align: right;
-    overflow-wrap: anywhere; /* long numbers won't overflow the card */
-}
-
-/* Utility class for JavaScript to toggle visibility */
-.hidden {
-    display: none !important;
-}
-
-/* --- 6. Formulas & Steps --- */
-.steps {
-    margin-top: 1rem;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 4px solid #3182ce;
-}
-
-.steps summary {
-    cursor: pointer;
-    padding: 0.85rem 1rem;
-    font-weight: 600;
-    color: #102a43;
-}
-
-.steps summary:focus-visible {
-    outline: 3px solid #102a43;
-    outline-offset: -3px;
-    border-radius: 8px;
-}
-
-#steps-content {
-    padding: 0 1rem 0.5rem;
-}
-
-.step {
-    padding: 0.75rem 0;
-    border-top: 1px solid #e2e8f0;
-}
-
-.step-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #486581;
-    margin-bottom: 0.25rem;
-}
-
-.step-formula {
-    font-weight: 700;
-    color: #102a43;
-    margin-bottom: 0.25rem;
-    overflow-wrap: anywhere;
-}
-
-.step-work {
-    font-size: 0.95rem;
-    color: #333;
-    overflow-wrap: anywhere;
-}
+.result dt { font-weight: 600; color: var(--muted); }
+.result dd { font-size: 1.15rem; font-weight: 700; color: var(--heading); text-align: right; overflow-wrap: anywhere; }
+#results:empty::before { content: 'Enter the values above to see results.'; color: var(--muted); font-size: 0.95rem; }
+details { margin-top: 1rem; }
+summary { cursor: pointer; font-weight: 600; color: var(--accent); border-radius: 4px; }
+.step { margin-top: 0.9rem; padding: 0.75rem; background: var(--soft); border-radius: 8px; }
+.step-label { font-weight: 600; color: var(--heading); }
+.step-formula, .step-work { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; overflow-wrap: anywhere; }
+.step-work { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
